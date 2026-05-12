@@ -65,22 +65,24 @@ export function EditorSection({ text, onTextChange }: EditorSectionProps) {
 
     // Start new speech
     try {
-      window.speechSynthesis.cancel(); // Cancel any ongoing speech
-      
+      window.speechSynthesis.cancel();
+
       const utterance = new SpeechSynthesisUtterance(text);
       utteranceRef.current = utterance;
 
-      // Try to find an Amharic voice, fallback to default
+      // Try to find an Amharic voice
       const voices = window.speechSynthesis.getVoices();
-      const amharicVoice = voices.find(voice => 
-        voice.lang.includes('am') || voice.lang.includes('AM')
+      const amharicVoice = voices.find(
+        (voice) =>
+          voice.lang.includes('am') ||
+          voice.lang.includes('AM')
       );
-      
+
       if (amharicVoice) {
         utterance.voice = amharicVoice;
       }
 
-      utterance.rate = 0.9; // Slightly slower for better clarity
+      utterance.rate = 0.9;
       utterance.pitch = 1.0;
       utterance.volume = 1.0;
 
@@ -98,30 +100,37 @@ export function EditorSection({ text, onTextChange }: EditorSectionProps) {
       utterance.onerror = (event) => {
         setIsSpeaking(false);
         setIsPaused(false);
-        
-        // Silently handle interrupted/cancelled speech
-        if (event.error === 'interrupted' || event.error === 'canceled' ) {
+
+        // Ignore interrupted/cancelled events
+        if (
+          event.error === 'interrupted' ||
+          event.error === 'canceled' 
+        ) {
           return;
         }
-        
-        // Only show user-friendly messages for actual errors
+
         if (event.error === 'network') {
           toast.error('Network error: Check your internet connection');
         } else if (event.error === 'synthesis-unavailable') {
           toast.error('Text-to-speech unavailable in this browser');
         } else if (event.error === 'synthesis-failed') {
-          toast.error('Failed to read text. Try selecting a different voice in your system settings.');
+          toast.error(
+            'Failed to read text. Try selecting a different voice in your system settings.'
+          );
         } else if (event.error === 'not-allowed') {
-          toast.error('Text-to-speech permission denied. Please check browser settings.');
+          toast.error(
+            'Text-to-speech permission denied. Please check browser settings.'
+          );
         }
-        // Don't show error toast for other cases - fail silently
       };
 
       window.speechSynthesis.speak(utterance);
     } catch (err) {
       setIsSpeaking(false);
       setIsPaused(false);
-      toast.error('Text-to-speech feature unavailable. Please try again later.');
+      toast.error(
+        'Text-to-speech feature unavailable. Please try again later.'
+      );
     }
   };
 
@@ -138,7 +147,7 @@ export function EditorSection({ text, onTextChange }: EditorSectionProps) {
           <PenTool className="w-5 h-5 text-amber-800" />
           <h3 className="text-amber-900">Text Editor</h3>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {isSpeaking && (
             <Button
@@ -151,6 +160,7 @@ export function EditorSection({ text, onTextChange }: EditorSectionProps) {
               Stop
             </Button>
           )}
+
           <Button
             onClick={speakText}
             size="sm"
@@ -182,21 +192,23 @@ export function EditorSection({ text, onTextChange }: EditorSectionProps) {
         <p className="text-sm text-amber-900/70">
           Review and refine the digitized text. Make corrections to preserve accuracy.
         </p>
-        
+
         <Textarea
           value={text}
           onChange={(e) => onTextChange(e.target.value)}
           className="min-h-[400px] font-mono bg-stone-50/50 border-amber-200 focus:border-amber-400"
           placeholder="Converted text will appear here..."
-          style={{ 
+          style={{
             lineHeight: '1.8',
-            fontSize: '16px'
+            fontSize: '16px',
           }}
         />
 
         <div className="flex justify-between text-xs text-amber-800/70">
           <span>Characters: {text.length}</span>
-          <span>Words: {text.trim().split(/\s+/).filter(w => w).length}</span>
+          <span>
+            Words: {text.trim().split(/\s+/).filter((w) => w).length}
+          </span>
         </div>
       </div>
     </Card>
